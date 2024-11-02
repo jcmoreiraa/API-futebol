@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+
+
+model Campeonato {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  dataInicio  DateTime
+  dataFim     DateTime
+  partidas    Partida[] 
+}
+
+model Time {
+  id               Int       @id @default(autoincrement())
+  nome             String     @unique
+  estadio          String?
+  brasao           String?
+  jogadores        Jogador[]
+  partidasCasa     Partida[] @relation("PartidasCasa")
+  partidasVisitante Partida[] @relation("PartidasVisitante")
+}
+
+model Partida {
+  id              Int      @id @default(autoincrement())
+  timeCasaId      Int
+  timeVisitanteId Int
+  timeCasa        Time     @relation("PartidasCasa", fields: [timeCasaId], references: [id])
+  timeVisitante   Time     @relation("PartidasVisitante", fields: [timeVisitanteId], references: [id])
+  data            DateTime
+  placarCasa      Int
+  placarVisitante Int
+  campeonatoId    Int      @default(1)  
+  campeonato      Campeonato @relation(fields: [campeonatoId], references: [id]) 
+  estadio         String?
+  arbitro         String?
+  estatisticas    EstatisticasJogador[]
+  lesoes          Lesao[]
+}
+
+model Jogador {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  posicao   String
+  foto      String
+  numero    Int
+  timeNome  String
+  time      Time      @relation(fields: [timeNome], references: [nome])
+  estatisticas EstatisticasJogador[]
+  lesoes    Lesao[]
+}
+
+model EstatisticasJogador {
+  id              Int      @id @default(autoincrement())
+  jogadorId       Int
+  jogador         Jogador  @relation(fields: [jogadorId], references: [id])
+  partidaId       Int
+  partida         Partida  @relation(fields: [partidaId], references: [id])
+  gols            Int      @default(0)
+  assistencias    Int      @default(0)
+  passesCompletos Int      @default(0)
+  cartoesAmarelos Int      @default(0)
+  cartoesVermelhos Int      @default(0)
+
+
+  @@unique([jogadorId, partidaId]) 
+}
+
+model Lesao {
+  id              Int      @id @default(autoincrement())
+  jogadorId       Int
+  jogador         Jogador  @relation(fields: [jogadorId], references: [id])
+  partidaId       Int
+  partida         Partida  @relation(fields: [partidaId], references: [id])
+  tipoLesao       String
+  duracaoEstimada String?
+}

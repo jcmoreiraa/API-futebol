@@ -1,0 +1,93 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table Campeonato {
+  id Int [pk, increment]
+  nome String [not null]
+  dataInicio DateTime [not null]
+  dataFim DateTime [not null]
+  partidas Partida [not null]
+}
+
+Table Time {
+  id Int [pk, increment]
+  nome String [unique, not null]
+  estadio String
+  brasao String
+  jogadores Jogador [not null]
+  partidasCasa Partida [not null]
+  partidasVisitante Partida [not null]
+}
+
+Table Partida {
+  id Int [pk, increment]
+  timeCasaId Int [not null]
+  timeVisitanteId Int [not null]
+  timeCasa Time [not null]
+  timeVisitante Time [not null]
+  data DateTime [not null]
+  placarCasa Int [not null]
+  placarVisitante Int [not null]
+  campeonatoId Int [not null, default: 1]
+  campeonato Campeonato [not null]
+  estadio String
+  arbitro String
+  estatisticas EstatisticasJogador [not null]
+  lesoes Lesao [not null]
+}
+
+Table Jogador {
+  id Int [pk, increment]
+  nome String [not null]
+  posicao String [not null]
+  foto String [not null]
+  numero Int [not null]
+  timeNome String [not null]
+  time Time [not null]
+  estatisticas EstatisticasJogador [not null]
+  lesoes Lesao [not null]
+}
+
+Table EstatisticasJogador {
+  id Int [pk, increment]
+  jogadorId Int [not null]
+  jogador Jogador [not null]
+  partidaId Int [not null]
+  partida Partida [not null]
+  gols Int [not null, default: 0]
+  assistencias Int [not null, default: 0]
+  passesCompletos Int [not null, default: 0]
+  cartoesAmarelos Int [not null, default: 0]
+  cartoesVermelhos Int [not null, default: 0]
+
+  indexes {
+    (jogadorId, partidaId) [unique]
+  }
+}
+
+Table Lesao {
+  id Int [pk, increment]
+  jogadorId Int [not null]
+  jogador Jogador [not null]
+  partidaId Int [not null]
+  partida Partida [not null]
+  tipoLesao String [not null]
+  duracaoEstimada String
+}
+
+Ref: Partida.timeCasaId > Time.id
+
+Ref: Partida.timeVisitanteId > Time.id
+
+Ref: Partida.campeonatoId > Campeonato.id
+
+Ref: Jogador.timeNome > Time.nome
+
+Ref: EstatisticasJogador.jogadorId > Jogador.id
+
+Ref: EstatisticasJogador.partidaId > Partida.id
+
+Ref: Lesao.jogadorId > Jogador.id
+
+Ref: Lesao.partidaId > Partida.id

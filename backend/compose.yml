@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: THM
+      POSTGRES_PASSWORD: THM
+      POSTGRES_DB: THM
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    container_name: backend
+    image: backend
+    build:
+      context: ../backend
+      dockerfile: backend.dockerfile
+    ports:
+      - "3005:3005"
+    environment:
+      DATABASE_URL: "postgresql://THM:THM@db:5432/THM?schema=public"
+    depends_on:
+      - db
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:latest
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
